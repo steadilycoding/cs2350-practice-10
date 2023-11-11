@@ -13,9 +13,46 @@ let initial_cards = [
     }
 ]
 
+function hideForm() {
+    document.querySelector("#myForm").classList.add("d-none")
+    document.querySelector("#cards").classList.remove("d-none")
+}
+
+
+function hideCards() {
+    document.querySelector("#myForm").classList.remove("d-none")
+    document.querySelector("#cards").classList.add("d-none")
+}
+
+function getCards() {
+    if(localStorage.getItem("cards") && localStorage.getItem("cards") != '[]') {
+        return JSON.parse(localStorage.getItem("cards"))
+    }else {
+        return initial_cards
+    }
+}
+
+function addNewCard(event) {
+    event.preventDefault()
+
+    let t = document.querySelector("#place").value
+    let d = document.querySelector("#description").value
+    let p = document.querySelector("#poster").value
+
+    let cards = getCards()
+    if (t && d && p) {
+        let card = { place: t, description: d, poster: p }
+        cards.push(card)
+        localStorage.setItem("cards", JSON.stringify(cards))
+    }
+
+    this.reset()
+    displayCards()
+}
+
 function displayCards() {
 
-    let cards = initial_cards
+    let cards = getCards()
     let cards_html = ""
     let ndx = 0
     for (let c of cards) {
@@ -42,6 +79,21 @@ function displayCards() {
     }
 
     document.querySelector("#cards").innerHTML = cards_html
+
+    document.querySelectorAll(".to-delete").forEach(function(btn) {
+        btn.onclick = function(event){
+            if (confirm("Are you sure?")) {
+                cards.splice(event.target.closest('col').dataset.ndx, 1)
+                localStorage.setItem("cards", JSON.stringify(cards))
+                displayCards()
+            }
+        }
+    })
+
+    hideForm()
 }
 
+document.querySelector("#myForm").onsubmit = addNewCard
+document.querySelector("#new_card").onclick = hideCards
+document.querySelector(".to-cancel").onclick = hideForm
 displayCards()
